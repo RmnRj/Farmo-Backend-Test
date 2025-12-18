@@ -6,8 +6,8 @@ from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
-from .models import Users, UsersProfile
-from .serializers import UsersSerializer, UsersProfileSerializer
+from backend.models import Users, UsersProfile
+from backend.serializers import UsersSerializer, UsersProfileSerializer
 
 
 @api_view(['POST'])

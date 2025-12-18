@@ -27,38 +27,29 @@ def register(request):
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])  # No authentication required for login
+@permission_classes([AllowAny])
 def login(request):
-    """Login with user_id/phone/email and password, returns JWT tokens"""
-    # Get login credentials from request
-    identifier = request.data.get('identifier')  # Can be user_id, phone, or email
+    """Login with user_id/phone and password"""
+    identifier = request.data.get('identifier')
     password = request.data.get('password')
     
-    # Validate required fields
     if not identifier or not password:
         return Response({'error': 'Identifier and password required'}, status=status.HTTP_400_BAD_REQUEST)
     
     try:
         from django.db.models import Q
-        # Find user by user_id, phone, or email using OR query
-        user = Users.objects.get(Q(user_id=identifier) | Q(phone=identifier) | Q(email=identifier))
+        user = Users.objects.get(Q(user_id=identifier) | Q(phone=identifier))
         
-        # Verify password from Credentials model (not Users model)
-        if hasattr(user, 'credentials') and user.credentials.password:
-            # Check hashed password matches
-            if user.credentials.check_password(password):
-                # Generate JWT tokens on successful authentication
-                refresh = RefreshToken.for_user(user)
-                return Response({
-                    'user': UsersSerializer(user).data,
-                    'refresh': str(refresh),  # For refreshing access tokens
-                    'access': str(refresh.access_token),  # For API authentication
-                }, status=status.HTTP_200_OK)
+        if user.check_password(password):
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'user': UsersSerializer(user).data,
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            }, status=status.HTTP_200_OK)
         
-        # Password verification failed
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     except Users.DoesNotExist:
-        # User not found - return same error for security
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 

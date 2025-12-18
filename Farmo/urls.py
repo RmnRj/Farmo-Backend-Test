@@ -16,13 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 from backend.authentication import register, login, verify_wallet_pin
+from backend.views import UsersViewSet, UsersProfileViewSet, signup
+
+router = DefaultRouter()
+router.register(r'users', UsersViewSet, basename='users')
+router.register(r'profiles', UsersProfileViewSet, basename='profiles')
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/auth/register/', register, name='register'),
+    path('api/auth/signup/', signup, name='signup'),
     path('api/auth/login/', login, name='login'),
     path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/wallet/verify-pin/', verify_wallet_pin, name='verify_wallet_pin'),
+    path('api/', include(router.urls)),
 ]

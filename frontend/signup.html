@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmo - Sign Up</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="form-box">
+            <h1>Sign Up for Farmo</h1>
+            <form id="signupForm">
+                <div class="input-group">
+                    <label>User ID</label>
+                    <input type="text" id="user_id" required>
+                </div>
+                <div class="input-group">
+                    <label>Profile ID</label>
+                    <input type="text" id="profile_id" required>
+                </div>
+                <div class="input-group">
+                    <label>First Name</label>
+                    <input type="text" id="f_name" required>
+                </div>
+                <div class="input-group">
+                    <label>Last Name</label>
+                    <input type="text" id="l_name" required>
+                </div>
+                <div class="input-group">
+                    <label>Phone</label>
+                    <input type="tel" id="phone" required>
+                </div>
+                <div class="input-group">
+                    <label>Email</label>
+                    <input type="email" id="email">
+                </div>
+                <div class="input-group">
+                    <label>User Type</label>
+                    <select id="user_type">
+                        <option value="customer">Customer</option>
+                        <option value="farmer">Farmer</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label>Password</label>
+                    <div class="password-field">
+                        <input type="password" id="password" required>
+                        <button type="button" id="togglePassword">Show</button>
+                    </div>
+                </div>
+                <button type="submit" class="btn-primary">Sign Up</button>
+                <p class="link-text">Already have an account? <a href="login.html">Login</a></p>
+            </form>
+        </div>
+    </div>
+    <script src="signup.js"></script>
+</body>
+</html>

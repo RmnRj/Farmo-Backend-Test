@@ -1,29 +1,33 @@
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-from .models import Users
+from .models import Users, AuthToken
 from .serializers import UsersSerializer
 
 
 @api_view(['POST'])
-@permission_classes([AllowAny])  # No authentication required for registration
-def register(request):
-    """Register new user and return JWT tokens"""
-    # Validate incoming user data
-    serializer = UsersSerializer(data=request.data)
-    if serializer.is_valid():
-        # Create new user in database
-        user = serializer.save()
-        # Generate JWT tokens for immediate login after registration
-        refresh = RefreshToken.for_user(user)
-        return Response({
-            'user': UsersSerializer(user).data,
-            'refresh': str(refresh),  # Long-lived token for getting new access tokens
-            'access': str(refresh.access_token),  # Short-lived token for API requests
-        }, status=status.HTTP_201_CREATED)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+@permission_classes([AllowAny])
+def verify_token(request):
+    """Verify auth token for remember me"""
+    auth_token = request.data.get('auth_token')
+    user_id = request.data.get('user_id')
+    
+    if not auth_token or not user_id:
+        return Response({'valid': False}, status=status.HTTP_400_BAD_REQUEST)
+    
+    try:
+        token = AuthToken.objects.select_related('user__profile_id').get(token=auth_token, user__user_id=user_id)
+        if token.user.profile_status.upper() == 'ACTIVE':
+            return Response({
+                'valid': True,
+                'user_id': token.user.user_id,
+                'name': f"{token.user.profile_id.f_name} {token.user.profile_id.l_name}",
+                'phone': token.user.phone
+            }, status=status.HTTP_200_OK)
+        return Response({'valid': False}, status=status.HTTP_403_FORBIDDEN)
+    except AuthToken.DoesNotExist:
+        return Response({'valid': False}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(['POST'])
@@ -38,14 +42,20 @@ def login(request):
     
     try:
         from django.db.models import Q
-        user = Users.objects.get(Q(user_id=identifier) | Q(phone=identifier))
+        user = Users.objects.select_related('profile_id').get(Q(user_id=identifier) | Q(phone=identifier))
+        
+        if user.profile_status.upper() != 'ACTIVE':
+            return Response({'error': 'Account is not active'}, status=status.HTTP_403_FORBIDDEN)
         
         if user.check_password(password):
-            refresh = RefreshToken.for_user(user)
+            AuthToken.objects.filter(user=user).delete()
+            token = AuthToken.objects.create(token=AuthToken.generate_token(), user=user)
+            
             return Response({
-                'user': UsersSerializer(user).data,
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
+                'auth_token': token.token,
+                'user_id': user.user_id,
+                'name': f"{user.profile_id.f_name} {user.profile_id.l_name}",
+                'phone': user.phone
             }, status=status.HTTP_200_OK)
         
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)

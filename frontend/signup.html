@@ -10,48 +10,104 @@
     <div class="container">
         <div class="form-box">
             <h1>Sign Up for Farmo</h1>
+            <div class="progress-bar">
+                <div class="step active" id="step1-indicator">1</div>
+                <div class="step" id="step2-indicator">2</div>
+                <div class="step" id="step3-indicator">3</div>
+            </div>
+            
             <form id="signupForm">
-                <div class="input-group">
-                    <label>User ID</label>
-                    <input type="text" id="user_id" required>
+                <!-- Step 1: Basic Info -->
+                <div class="form-step active" id="step1">
+                    <h3>Basic Information</h3>
+                    <div class="input-group">
+                        <label>User ID</label>
+                        <input type="text" id="user_id" required>
+                    </div>
+                    <div class="input-group">
+                        <label>First Name</label>
+                        <input type="text" id="f_name" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Middle Name</label>
+                        <input type="text" id="m_name">
+                    </div>
+                    <div class="input-group">
+                        <label>Last Name</label>
+                        <input type="text" id="l_name" required>
+                    </div>
+                    <div class="input-group">
+                        <label>User Type</label>
+                        <select id="user_type">
+                            <option value="customer">Customer</option>
+                            <option value="farmer">Farmer</option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Password</label>
+                        <div class="password-field">
+                            <input type="password" id="password" required>
+                            <button type="button" id="togglePassword">Show</button>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-primary" onclick="nextStep(2)">Next</button>
                 </div>
-                <div class="input-group">
-                    <label>Profile ID</label>
-                    <input type="text" id="profile_id" required>
-                </div>
-                <div class="input-group">
-                    <label>First Name</label>
-                    <input type="text" id="f_name" required>
-                </div>
-                <div class="input-group">
-                    <label>Last Name</label>
-                    <input type="text" id="l_name" required>
-                </div>
-                <div class="input-group">
-                    <label>Phone</label>
-                    <input type="tel" id="phone" required>
-                </div>
-                <div class="input-group">
-                    <label>Email</label>
-                    <input type="email" id="email">
-                </div>
-                <div class="input-group">
-                    <label>User Type</label>
-                    <select id="user_type">
-                        <option value="customer">Customer</option>
-                        <option value="farmer">Farmer</option>
-                    </select>
-                </div>
-                <div class="input-group">
-                    <label>Password</label>
-                    <div class="password-field">
-                        <input type="password" id="password" required>
-                        <button type="button" id="togglePassword">Show</button>
+
+                <!-- Step 2: Address -->
+                <div class="form-step" id="step2">
+                    <h3>Address Information</h3>
+                    <div class="input-group">
+                        <label>Province</label>
+                        <input type="text" id="province">
+                    </div>
+                    <div class="input-group">
+                        <label>District</label>
+                        <input type="text" id="district">
+                    </div>
+                    <div class="input-group">
+                        <label>Ward</label>
+                        <input type="text" id="ward">
+                    </div>
+                    <div class="input-group">
+                        <label>Tole</label>
+                        <input type="text" id="tole">
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn-secondary" onclick="prevStep(1)">Back</button>
+                        <button type="button" class="btn-primary" onclick="nextStep(3)">Next</button>
                     </div>
                 </div>
-                <button type="submit" class="btn-primary">Sign Up</button>
-                <p class="link-text">Already have an account? <a href="login.html">Login</a></p>
+
+                <!-- Step 3: Contact -->
+                <div class="form-step" id="step3">
+                    <h3>Contact Information</h3>
+                    <div class="input-group">
+                        <label>Phone (Primary)</label>
+                        <input type="tel" id="phone" required>
+                    </div>
+                    <div class="input-group">
+                        <label>Phone (Secondary)</label>
+                        <input type="tel" id="phone02">
+                    </div>
+                    <div class="input-group">
+                        <label>Email</label>
+                        <input type="email" id="email">
+                    </div>
+                    <div class="input-group">
+                        <label>WhatsApp</label>
+                        <input type="tel" id="whatsapp">
+                    </div>
+                    <div class="input-group">
+                        <label>Facebook</label>
+                        <input type="text" id="facebook">
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn-secondary" onclick="prevStep(2)">Back</button>
+                        <button type="submit" class="btn-primary">Sign Up</button>
+                    </div>
+                </div>
             </form>
+            <p class="link-text">Already have an account? <a href="login.html">Login</a></p>
         </div>
     </div>
     <script src="signup.js"></script>

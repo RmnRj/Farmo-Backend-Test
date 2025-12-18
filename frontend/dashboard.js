@@ -1,14 +1,23 @@
-const user = JSON.parse(localStorage.getItem('user'));
+const authToken = localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
+const userId = localStorage.getItem('user_id') || sessionStorage.getItem('user_id');
+const userName = localStorage.getItem('user_name');
+const userPhone = localStorage.getItem('user_phone');
 
-if (!user) {
-    window.location.href = 'login.html';
+if (!authToken || !userId) {
+    window.location.replace('login.html');
 }
 
-document.getElementById('userName').textContent = user.user_id;
-document.getElementById('userId').textContent = user.user_id;
-document.getElementById('userPhone').textContent = user.phone;
+history.pushState(null, null, location.href);
+window.onpopstate = function() {
+    history.go(1);
+};
+
+document.getElementById('userName').textContent = userName || userId;
+document.getElementById('userId').textContent = userId;
+document.getElementById('userPhone').textContent = userPhone;
 
 document.getElementById('logoutBtn').addEventListener('click', function() {
     localStorage.clear();
-    window.location.href = 'login.html';
+    sessionStorage.clear();
+    window.location.replace('login.html');
 });

@@ -7,18 +7,43 @@ document.getElementById('togglePassword').addEventListener('click', function() {
     this.textContent = type === 'password' ? 'Show' : 'Hide';
 });
 
+function nextStep(step) {
+    document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    
+    document.getElementById('step' + step).classList.add('active');
+    document.getElementById('step' + step + '-indicator').classList.add('active');
+}
+
+function prevStep(step) {
+    document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    
+    document.getElementById('step' + step).classList.add('active');
+    for(let i = 1; i <= step; i++) {
+        document.getElementById('step' + i + '-indicator').classList.add('active');
+    }
+}
+
 document.getElementById('signupForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
     const formData = {
         user_id: document.getElementById('user_id').value,
-        profile_id: document.getElementById('profile_id').value,
         f_name: document.getElementById('f_name').value,
+        m_name: document.getElementById('m_name').value,
         l_name: document.getElementById('l_name').value,
-        phone: document.getElementById('phone').value,
-        email: document.getElementById('email').value,
         user_type: document.getElementById('user_type').value,
-        password: document.getElementById('password').value
+        password: document.getElementById('password').value,
+        province: document.getElementById('province').value,
+        district: document.getElementById('district').value,
+        ward: document.getElementById('ward').value,
+        tole: document.getElementById('tole').value,
+        phone: document.getElementById('phone').value,
+        phone02: document.getElementById('phone02').value,
+        email: document.getElementById('email').value,
+        whatsapp: document.getElementById('whatsapp').value,
+        facebook: document.getElementById('facebook').value
     };
     
     try {

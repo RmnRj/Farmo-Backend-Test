@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password, check_password
+import secrets
 
 
 
@@ -47,6 +48,20 @@ class Users(models.Model):
 
 	def __str__(self):
 		return f"User {self.user_id}"
+
+
+class AuthToken(models.Model):
+	"""Authentication token for user sessions"""
+	token = models.CharField(max_length=64, primary_key=True)
+	user = models.ForeignKey(Users, on_delete=models.CASCADE)
+	created_at = models.DateTimeField(default=timezone.now)
+
+	@staticmethod
+	def generate_token():
+		return secrets.token_urlsafe(48)
+
+	def __str__(self):
+		return f"Token for {self.user.user_id}"
 
 
 class Wallet(models.Model):

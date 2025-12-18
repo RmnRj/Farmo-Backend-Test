@@ -19,7 +19,8 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 from backend.authentication import login, verify_wallet_pin, verify_token
-from backend.views import UsersViewSet, UsersProfileViewSet, signup
+from backend.views import UsersViewSet, UsersProfileViewSet
+from backend.serve_signup import signup
 
 router = DefaultRouter()
 router.register(r'users', UsersViewSet, basename='users')

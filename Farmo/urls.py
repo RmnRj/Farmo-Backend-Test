@@ -19,7 +19,7 @@ from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 from backend.views import UsersViewSet, UsersProfileViewSet
-from backend.services.signup_service import signup
+from backend.services.serve_signup import signup
 from backend.services.auth_service import login, verify_token, verify_wallet_pin
 
 router = DefaultRouter()

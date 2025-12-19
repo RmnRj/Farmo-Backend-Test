@@ -49,19 +49,17 @@ class Users(models.Model):
 	def __str__(self):
 		return f"User {self.user_id}"
 
-
 class AuthToken(models.Model):
-	"""Authentication token for user sessions"""
-	token = models.CharField(max_length=64, primary_key=True)
-	user = models.ForeignKey(Users, on_delete=models.CASCADE)
-	created_at = models.DateTimeField(default=timezone.now)
-
-	@staticmethod
-	def generate_token():
-		return secrets.token_urlsafe(48)
+	"""Tokens model for JWT token management"""
+	user_id = models.ForeignKey(Users, on_delete=models.CASCADE)
+	token = models.TextField()
+	device_info = models.CharField(max_length=255, blank=True, null=True)
+	issued_at = models.DateTimeField(default=timezone.now)
+	expires_at = models.DateTimeField()
+	refresh_token = models.TextField(blank=True, null=True)
 
 	def __str__(self):
-		return f"Token for {self.user.user_id}"
+		return f"Token for {self.user_id}"
 
 
 class Wallet(models.Model):

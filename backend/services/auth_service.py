@@ -29,6 +29,8 @@ def login(request):
     """
     identifier = request.data.get('identifier')
     password = request.data.get('password')
+    is_admin = request.data.get('is_admin', False)
+    device_info = request.data.get('device_info', '')
     
     if not identifier or not password:
         return Response({'error': 'Identifier and password required'}, status=status.HTTP_400_BAD_REQUEST)

@@ -34,7 +34,7 @@ class Users(models.Model):
 	phone = models.CharField(max_length=15, blank=True)
 	password = models.CharField(max_length=128)
 	profile_status = models.CharField(max_length=20, default='ACTIVE')
-	is_active = models.BooleanField()
+	is_active = models.BooleanField(default=True)
 	is_admin = models.BooleanField(default=False)
 	profile_id = models.ForeignKey(UsersProfile, on_delete=models.PROTECT)
 

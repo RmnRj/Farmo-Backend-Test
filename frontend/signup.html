@@ -9,23 +9,45 @@
 <body>
     <div class="container">
         <div class="form-box">
-            <h1>Sign Up for Farmo</h1>
+            <h1>Register New User</h1>
             <div class="progress-bar">
                 <div class="step active" id="step1-indicator">1</div>
                 <div class="step" id="step2-indicator">2</div>
                 <div class="step" id="step3-indicator">3</div>
+                <div class="step" id="step4-indicator">4</div>
             </div>
             
-            <form id="signupForm">
-                <!-- Step 1: Basic Info -->
+            <form id="signupForm" enctype="multipart/form-data">
+                <!-- Step 1: Account Info -->
                 <div class="form-step active" id="step1">
-                    <h3>Basic Information</h3>
+                    <h3>Account Information</h3>
                     <div class="input-group">
-                        <label>User ID</label>
+                        <label>User ID*</label>
                         <input type="text" id="user_id" required>
                     </div>
                     <div class="input-group">
-                        <label>First Name</label>
+                        <label>Password*</label>
+                        <div class="password-field">
+                            <input type="password" id="password" required>
+                            <button type="button" id="togglePassword">Show</button>
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>User Type*</label>
+                        <select id="user_type" required>
+                            <option value="">Select Type</option>
+                            <option value="farmer">Farmer</option>
+                            <option value="consumer">Consumer</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn-primary" onclick="nextStep(2)">Next</button>
+                </div>
+
+                <!-- Step 2: Personal Info -->
+                <div class="form-step" id="step2">
+                    <h3>Personal Information</h3>
+                    <div class="input-group">
+                        <label>First Name*</label>
                         <input type="text" id="f_name" required>
                     </div>
                     <div class="input-group">
@@ -33,28 +55,38 @@
                         <input type="text" id="m_name">
                     </div>
                     <div class="input-group">
-                        <label>Last Name</label>
+                        <label>Last Name*</label>
                         <input type="text" id="l_name" required>
                     </div>
                     <div class="input-group">
-                        <label>User Type</label>
-                        <select id="user_type">
-                            <option value="customer">Customer</option>
-                            <option value="farmer">Farmer</option>
+                        <label>Date of Birth</label>
+                        <input type="date" id="dob">
+                    </div>
+                    <div class="input-group">
+                        <label>Sex</label>
+                        <select id="sex">
+                            <option value="">Select</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                            <option value="other">Other</option>
                         </select>
                     </div>
                     <div class="input-group">
-                        <label>Password</label>
-                        <div class="password-field">
-                            <input type="password" id="password" required>
-                            <button type="button" id="togglePassword">Show</button>
-                        </div>
+                        <label>Profile Picture</label>
+                        <input type="file" id="profile_picture" accept="image/*">
                     </div>
-                    <button type="button" class="btn-primary" onclick="nextStep(2)">Next</button>
+                    <div class="input-group">
+                        <label>About User</label>
+                        <textarea id="about" rows="3"></textarea>
+                    </div>
+                    <div class="btn-group">
+                        <button type="button" class="btn-secondary" onclick="prevStep(1)">Back</button>
+                        <button type="button" class="btn-primary" onclick="nextStep(3)">Next</button>
+                    </div>
                 </div>
 
-                <!-- Step 2: Address -->
-                <div class="form-step" id="step2">
+                <!-- Step 3: Address -->
+                <div class="form-step" id="step3">
                     <h3>Address Information</h3>
                     <div class="input-group">
                         <label>Province</label>
@@ -73,21 +105,21 @@
                         <input type="text" id="tole">
                     </div>
                     <div class="btn-group">
-                        <button type="button" class="btn-secondary" onclick="prevStep(1)">Back</button>
-                        <button type="button" class="btn-primary" onclick="nextStep(3)">Next</button>
+                        <button type="button" class="btn-secondary" onclick="prevStep(2)">Back</button>
+                        <button type="button" class="btn-primary" onclick="nextStep(4)">Next</button>
                     </div>
                 </div>
 
-                <!-- Step 3: Contact -->
-                <div class="form-step" id="step3">
+                <!-- Step 4: Contact -->
+                <div class="form-step" id="step4">
                     <h3>Contact Information</h3>
                     <div class="input-group">
                         <label>Phone (Primary)</label>
-                        <input type="tel" id="phone" required>
+                        <input type="tel" id="phone">
                     </div>
                     <div class="input-group">
                         <label>Phone (Secondary)</label>
-                        <input type="tel" id="phone02">
+                        <input type="tel" id="phone2">
                     </div>
                     <div class="input-group">
                         <label>Email</label>
@@ -102,8 +134,8 @@
                         <input type="text" id="facebook">
                     </div>
                     <div class="btn-group">
-                        <button type="button" class="btn-secondary" onclick="prevStep(2)">Back</button>
-                        <button type="submit" class="btn-primary">Sign Up</button>
+                        <button type="button" class="btn-secondary" onclick="prevStep(3)">Back</button>
+                        <button type="submit" class="btn-primary">Register New User</button>
                     </div>
                 </div>
             </form>

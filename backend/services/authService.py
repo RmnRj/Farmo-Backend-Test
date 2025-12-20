@@ -8,7 +8,7 @@ from ..serializers import UsersSerializer
 from django.utils import timezone
 from datetime import timedelta
 import secrets
-from ..utils.update_last_activity import update_last_activity
+from ..utils.updateLastActivity import update_last_activity
 
 
 @api_view(['POST'])

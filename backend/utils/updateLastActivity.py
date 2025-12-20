@@ -22,7 +22,7 @@ def get_online_status(user):
             return 'online'
         elif diff < timedelta(minutes=35):
             minutes_ago = int(diff.total_seconds() / 60)
-            return f'{minutes_ago} min ago'
+            return f'Online {minutes_ago} min ago'
         else:
             return 'offline'
     except UserActivity.DoesNotExist:

@@ -16,12 +16,14 @@ Including another URLconf
 """
 
 from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 from backend.views import UsersViewSet, UsersProfileViewSet
-from backend.services.serve_signup import register, check_userid
-from backend.services.auth_service import login,  verify_wallet_pin, refresh_token_view
-from backend.services.user_status import user_online_status
+from backend.services.userProfile import register, check_userid, user_online_status
+from backend.services.authService import login,  verify_wallet_pin, refresh_token_view
+
 
 router = DefaultRouter()
 router.register(r'users', UsersViewSet, basename='users')
@@ -37,4 +39,7 @@ urlpatterns = [
     path('api/user/online-status/', user_online_status, name='user_online_status'),
     path('api/wallet/verify-pin/', verify_wallet_pin, name='verify_wallet_pin')
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

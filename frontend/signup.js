@@ -1,4 +1,4 @@
-const API_URL = 'http://localhost:8000/api/auth/signup/';
+const API_URL = 'http://localhost:8000/api/auth/register/';
 
 document.getElementById('togglePassword').addEventListener('click', function() {
     const passwordField = document.getElementById('password');
@@ -12,7 +12,9 @@ function nextStep(step) {
     document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
     
     document.getElementById('step' + step).classList.add('active');
-    document.getElementById('step' + step + '-indicator').classList.add('active');
+    for(let i = 1; i <= step; i++) {
+        document.getElementById('step' + i + '-indicator').classList.add('active');
+    }
 }
 
 function prevStep(step) {
@@ -28,42 +30,46 @@ function prevStep(step) {
 document.getElementById('signupForm').addEventListener('submit', async function(e) {
     e.preventDefault();
     
-    const formData = {
-        user_id: document.getElementById('user_id').value,
-        f_name: document.getElementById('f_name').value,
-        m_name: document.getElementById('m_name').value,
-        l_name: document.getElementById('l_name').value,
-        user_type: document.getElementById('user_type').value,
-        password: document.getElementById('password').value,
-        province: document.getElementById('province').value,
-        district: document.getElementById('district').value,
-        ward: document.getElementById('ward').value,
-        tole: document.getElementById('tole').value,
-        phone: document.getElementById('phone').value,
-        phone02: document.getElementById('phone02').value,
-        email: document.getElementById('email').value,
-        whatsapp: document.getElementById('whatsapp').value,
-        facebook: document.getElementById('facebook').value
-    };
+    const formData = new FormData();
+    formData.append('user_id', document.getElementById('user_id').value);
+    formData.append('password', document.getElementById('password').value);
+    formData.append('user_type', document.getElementById('user_type').value);
+    formData.append('f_name', document.getElementById('f_name').value);
+    formData.append('m_name', document.getElementById('m_name').value);
+    formData.append('l_name', document.getElementById('l_name').value);
+    formData.append('dob', document.getElementById('dob').value);
+    formData.append('sex', document.getElementById('sex').value);
+    formData.append('about', document.getElementById('about').value);
+    formData.append('province', document.getElementById('province').value);
+    formData.append('district', document.getElementById('district').value);
+    formData.append('ward', document.getElementById('ward').value);
+    formData.append('tole', document.getElementById('tole').value);
+    formData.append('phone', document.getElementById('phone').value);
+    formData.append('phone2', document.getElementById('phone2').value);
+    formData.append('email', document.getElementById('email').value);
+    formData.append('whatsapp', document.getElementById('whatsapp').value);
+    formData.append('facebook', document.getElementById('facebook').value);
+    
+    const profilePicture = document.getElementById('profile_picture').files[0];
+    if (profilePicture) {
+        formData.append('profile_picture', profilePicture);
+    }
     
     try {
         const response = await fetch(API_URL, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(formData)
+            body: formData
         });
         
         const data = await response.json();
         
         if (response.ok) {
-            alert('Account created successfully! Please login.');
+            alert('User registered successfully! Please login.');
             window.location.href = 'login.html';
         } else {
-            alert(JSON.stringify(data));
+            alert('Error: ' + (data.error || JSON.stringify(data)));
         }
     } catch (error) {
-        alert('Error connecting to server');
+        alert('Error connecting to server: ' + error.message);
     }
 });

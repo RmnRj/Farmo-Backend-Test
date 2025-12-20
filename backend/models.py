@@ -8,6 +8,7 @@ import secrets
 class UsersProfile(models.Model):
 	"""User profile storing detailed user information"""
 	profile_id = models.CharField(max_length=20, primary_key=True)
+	profile_url = models.CharField(max_length=255, blank=True, null=True)
 	f_name = models.CharField(max_length=50)
 	m_name = models.CharField(max_length=50, blank=True, null=True)
 	l_name = models.CharField(max_length=50)
@@ -34,7 +35,6 @@ class Users(models.Model):
 	phone = models.CharField(max_length=15, blank=True)
 	password = models.CharField(max_length=128)
 	profile_status = models.CharField(max_length=20, default='ACTIVE')
-	is_active = models.BooleanField(default=True)
 	is_admin = models.BooleanField(default=False)
 	profile_id = models.ForeignKey(UsersProfile, on_delete=models.PROTECT)
 

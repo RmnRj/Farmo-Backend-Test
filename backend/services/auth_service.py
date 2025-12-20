@@ -1,32 +1,20 @@
-"""
-Authentication service module
-Handles login and token verification
-"""
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
+from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
-from backend.models import Users, AuthToken
+from ..models import Users, AuthToken as Au
+from ..serializers import UsersSerializer
+from django.utils import timezone
+from datetime import timedelta
+import secrets
+from ..utils.update_last_activity import update_last_activity
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login(request):
-    """Login with user_id/phone and password
-    
-    Validates credentials and checks if profile_status is ACTIVE.
-    Generates and returns authentication token on success.
-    
-    Request data:
-    - identifier: user_id or phone
-    - password: user password
-    
-    Returns:
-    - 200: Login successful with auth_token
-    - 400: Missing credentials
-    - 401: Invalid credentials
-    - 403: Account not active
-    """
+    """Login with identifier and password, returns tokens"""
     identifier = request.data.get('identifier')
     password = request.data.get('password')
     is_admin = request.data.get('is_admin', False)
@@ -37,98 +25,104 @@ def login(request):
     
     try:
         from django.db.models import Q
-        # Find user by user_id or phone
-        user = Users.objects.select_related('profile_id').get(Q(user_id=identifier) | Q(phone=identifier))
+        user = Users.objects.get(Q(user_id=identifier) | Q(phone=identifier), is_admin=is_admin)
         
-        # Check if account is active
-        if user.profile_status.upper() != 'ACTIVE':
-            return Response({'error': 'Account is not active'}, status=status.HTTP_403_FORBIDDEN)
+        if not user.check_password(password):
+            return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
         
-        # Verify password
-        if user.check_password(password):
-            # Delete old tokens and create new one
-            AuthToken.objects.filter(user=user).delete()
-            token = AuthToken.objects.create(token=AuthToken.generate_token(), user=user)
+        if user.profile_status == 'PENDING':
+            return Response({'status': 'pending', 'message': 'Please activate your account'}, status=status.HTTP_403_FORBIDDEN)
+        
+        if user.profile_status != 'ACTIVATED':
+            return Response({'error': 'Account not active'}, status=status.HTTP_403_FORBIDDEN)
+        
+        token = secrets.token_urlsafe(32)
+        refresh_token = secrets.token_urlsafe(32)
+        issued_at = timezone.now()
+        expires_at = issued_at + timedelta(days=40)
+        
+        Au.objects.create(
+            user_id=user,
+            token=token,
+            device_info=device_info,
+            issued_at=issued_at,
+            expires_at=expires_at,
+            refresh_token=refresh_token
+        )
+        
+        update_last_activity(user)
+        
+        return Response({
+            'user': UsersSerializer(user).data,
+            'token': token,
+            'refresh_token': refresh_token,
+        }, status=status.HTTP_200_OK)
+    
             
-            return Response({
-                'auth_token': token.token,
-                'user_id': user.user_id,
-                'name': f"{user.profile_id.f_name} {user.profile_id.l_name}",
-                'phone': user.phone
-            }, status=status.HTTP_200_OK)
-        
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
     except Users.DoesNotExist:
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(['POST'])
 @permission_classes([AllowAny])
-def verify_token(request):
-    """Verify auth token for remember me functionality
-    
-    Checks if provided token is valid and associated with active user.
-    
-    Request data:
-    - auth_token: Authentication token
-    - user_id: User identifier
-    
-    Returns:
-    - 200: Token valid with user details
-    - 400: Missing parameters
-    - 401: Invalid token
-    - 403: Account not active
-    """
-    auth_token = request.data.get('auth_token')
+def refresh_token_view(request):
+    """Refresh expired token using refresh_token"""
     user_id = request.data.get('user_id')
+    token = request.data.get('token')
+    refresh_token = request.data.get('refresh_token')
+    device_info = request.data.get('device_info', '')
     
-    if not auth_token or not user_id:
-        return Response({'valid': False}, status=status.HTTP_400_BAD_REQUEST)
+    if not user_id or not token or not refresh_token:
+        return Response({'error': 'user_id, token and refresh_token required'}, status=status.HTTP_400_BAD_REQUEST)
     
     try:
-        # Verify token exists and belongs to user
-        token = AuthToken.objects.select_related('user__profile_id').get(token=auth_token, user__user_id=user_id)
+        token_obj = Au.objects.get(user_id__user_id=user_id, token=token, refresh_token=refresh_token)
         
-        # Check if account is still active
-        if token.user.profile_status.upper() == 'ACTIVE':
-            return Response({
-                'valid': True,
-                'user_id': token.user.user_id,
-                'name': f"{token.user.profile_id.f_name} {token.user.profile_id.l_name}",
-                'phone': token.user.phone
-            }, status=status.HTTP_200_OK)
+        if token_obj.expires_at > timezone.now():
+            return Response({'message': 'Token still valid', 'token': token, 'refresh_token': refresh_token}, status=status.HTTP_200_OK)
         
-        return Response({'valid': False}, status=status.HTTP_403_FORBIDDEN)
-    except AuthToken.DoesNotExist:
-        return Response({'valid': False}, status=status.HTTP_401_UNAUTHORIZED)
-    
+        update_last_activity(token_obj.user_id)
 
-@api_view(['POST'])
+        new_token = secrets.token_urlsafe(32)
+        new_refresh_token = secrets.token_urlsafe(32)
+        new_expires_at = timezone.now() + timedelta(days=40)
+        
+        token_obj.token = new_token
+        token_obj.refresh_token = new_refresh_token
+        token_obj.expires_at = new_expires_at
+        token_obj.issued_at = timezone.now()
+        token_obj.device_info = device_info
+        token_obj.save()
+        
+        return Response({
+            'token': new_token,
+            'refresh_token': new_refresh_token,
+        }, status=status.HTTP_200_OK)
+        
+    except Au.DoesNotExist:
+        return Response({'error': 'Invalid token or refresh_token'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+@api_view(['POST'])  # Requires JWT authentication (default)
 def verify_wallet_pin(request):
-    """Verify wallet PIN for authenticated user before transactions
-    
-    Request data:
-    - wallet_id: Wallet identifier
-    - pin: 4-digit PIN
-    
-    Returns:
-    - 200: PIN verified successfully
-    - 400: Missing parameters
-    - 401: Invalid PIN
-    - 404: Wallet not found
-    """
+    """Verify wallet PIN for authenticated user before transactions"""
+    # Get wallet ID and PIN from request
     wallet_id = request.data.get('wallet_id')
     pin = request.data.get('pin')
     
+    # Validate required fields
     if not wallet_id or not pin:
         return Response({'error': 'Wallet ID and PIN required'}, status=status.HTTP_400_BAD_REQUEST)
     
     try:
-        from backend.models import Wallet
+        from ..models import Wallet
+        # Ensure wallet belongs to authenticated user (security check)
         wallet = Wallet.objects.get(wallet_id=wallet_id, user=request.user)
+        # Verify hashed PIN matches
         if wallet.check_pin(pin):
             return Response({'verified': True}, status=status.HTTP_200_OK)
+        # PIN verification failed
         return Response({'error': 'Invalid PIN'}, status=status.HTTP_401_UNAUTHORIZED)
     except Wallet.DoesNotExist:
+        # Wallet not found or doesn't belong to user
         return Response({'error': 'Wallet not found'}, status=status.HTTP_404_NOT_FOUND)
-

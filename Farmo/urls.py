@@ -14,23 +14,27 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
+
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 from backend.views import UsersViewSet, UsersProfileViewSet
-from backend.services.serve_signup import signup
-from backend.services.auth_service import login, verify_token, verify_wallet_pin
+from backend.services.serve_signup import register, check_userid
+from backend.services.auth_service import login,  verify_wallet_pin, refresh_token_view
+from backend.services.user_status import user_online_status
 
 router = DefaultRouter()
 router.register(r'users', UsersViewSet, basename='users')
 router.register(r'profiles', UsersProfileViewSet, basename='profiles')
 
+
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/auth/signup/', signup, name='signup'),
+    #path('admin/', admin.site.urls),
+    path('api/auth/register/', register, name='register'),
+    path('api/auth/check-userid/', check_userid, name='check_userid'),
     path('api/auth/login/', login, name='login'),
-    path('api/auth/verify-token/', verify_token, name='verify_token'),
-    path('api/wallet/verify-pin/', verify_wallet_pin, name='verify_wallet_pin'),
-    path('api/', include(router.urls)),
+    path('api/auth/refresh-token/', refresh_token_view, name='refresh_token'),
+    path('api/user/online-status/', user_online_status, name='user_online_status'),
+    path('api/wallet/verify-pin/', verify_wallet_pin, name='verify_wallet_pin')
 ]
+

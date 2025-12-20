@@ -117,3 +117,9 @@ class AuthTokenSerializer(serializers.ModelSerializer):
     class Meta:
         model = AuthToken
         fields = '__all__'
+
+class UserActivitySerializer(serializers.ModelSerializer):
+    """Serializer for UserActivity model"""
+    class Meta:
+        model = Users
+        fields = '__all__'
